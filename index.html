@@ -993,38 +993,34 @@
 
       function exportTripForInvite(trip) {
         return {
-          id: trip.id,
-          name: trip.name,
-          destination: trip.destination,
-          startDate: trip.startDate,
-          endDate: trip.endDate,
-          participantsLimit: trip.participantsLimit,
-          budgetPerPerson: trip.budgetPerPerson,
-          ownerProfileId: trip.ownerProfileId,
-          createdAt: trip.createdAt,
-          participants: trip.participants.map((item) => ({
-            id: item.id,
-            profileId: item.profileId,
-            name: item.name,
-            role: item.role,
-            online: false,
-            checkedIn: false,
+          i: trip.id,
+          n: trip.name,
+          d: trip.destination,
+          s: trip.startDate,
+          e: trip.endDate,
+          l: trip.participantsLimit,
+          b: trip.budgetPerPerson,
+          o: trip.ownerProfileId,
+          c: trip.createdAt,
+          p: trip.participants.map((item) => ({
+            i: item.id,
+            r: item.profileId,
+            n: item.name,
+            t: item.role,
           })),
-          accommodations: trip.accommodations.map((item) => ({
-            id: item.id,
-            source: item.source,
-            originalLink: item.originalLink,
-            name: item.name,
-            imageUrl: item.imageUrl,
-            location: item.location,
-            rating: item.rating,
-            totalPrice: item.totalPrice,
-            pricePerPerson: item.pricePerPerson,
-            breakfast: item.breakfast,
-            createdAt: item.createdAt,
+          a: trip.accommodations.map((item) => ({
+            i: item.id,
+            s: item.source,
+            u: item.originalLink,
+            n: item.name,
+            m: item.imageUrl,
+            l: item.location,
+            r: item.rating,
+            tp: item.totalPrice,
+            pp: item.pricePerPerson,
+            b: item.breakfast,
+            c: item.createdAt,
           })),
-          votes: [],
-          documents: [],
         };
       }
 
@@ -1038,7 +1034,45 @@
 
       function deserializeTripData(value) {
         try {
-          return JSON.parse(decodeURIComponent(escape(atob(value))));
+          const parsed = JSON.parse(decodeURIComponent(escape(atob(value))));
+          if (!parsed) return null;
+          if (parsed.i && parsed.a) {
+            return {
+              id: parsed.i,
+              name: parsed.n,
+              destination: parsed.d,
+              startDate: parsed.s,
+              endDate: parsed.e,
+              participantsLimit: parsed.l,
+              budgetPerPerson: parsed.b,
+              ownerProfileId: parsed.o,
+              createdAt: parsed.c,
+              participants: (parsed.p || []).map((item) => ({
+                id: item.i,
+                profileId: item.r,
+                name: item.n,
+                role: item.t,
+                online: false,
+                checkedIn: false,
+              })),
+              accommodations: (parsed.a || []).map((item) => ({
+                id: item.i,
+                source: item.s,
+                originalLink: item.u,
+                name: item.n,
+                imageUrl: item.m,
+                location: item.l,
+                rating: item.r,
+                totalPrice: item.tp,
+                pricePerPerson: item.pp,
+                breakfast: item.b,
+                createdAt: item.c,
+              })),
+              votes: [],
+              documents: [],
+            };
+          }
+          return parsed;
         } catch {
           return null;
         }
@@ -1090,7 +1124,7 @@
           const hash = rawValue.split("#")[1] || "";
           const params = new URLSearchParams(hash);
           parsedTripId = params.get("trip") || "";
-          encoded = params.get("data") || "";
+          encoded = params.get("invite") || params.get("data") || "";
         } else if (rawValue.startsWith("trip_")) {
           parsedTripId = rawValue.trim();
         }
@@ -2025,10 +2059,10 @@
         const copyButton = document.getElementById("copy-link");
         if (copyButton) {
           copyButton.onclick = async () => {
-            const link = `${window.location.href.split("#")[0]}#trip=${tripId}`;
+            const link = buildShareLink(tripId);
             try {
               await navigator.clipboard.writeText(link);
-              window.alert(`Link curto copiado. ID da viagem: ${tripId}`);
+              window.alert(`Link de convite copiado. ID da viagem: ${tripId}`);
             } catch {
               window.alert(`Link: ${link}\nID da viagem: ${tripId}`);
             }
@@ -2038,10 +2072,10 @@
         const shareButton = document.getElementById("share-link");
         if (shareButton) {
           shareButton.onclick = async () => {
-            const link = `${window.location.href.split("#")[0]}#trip=${tripId}`;
+            const link = buildShareLink(tripId);
             try {
               await navigator.clipboard.writeText(link);
-              window.alert(`Link curto pronto para compartilhar.\nID da viagem: ${tripId}`);
+              window.alert(`Link de convite pronto para compartilhar.\nID da viagem: ${tripId}`);
             } catch {
               window.alert(`Link: ${link}\nID da viagem: ${tripId}`);
             }
