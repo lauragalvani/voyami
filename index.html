@@ -988,12 +988,49 @@
       function parseSharedTripDataFromHash() {
         const hash = window.location.hash.replace(/^#/, "");
         const params = new URLSearchParams(hash);
-        return params.get("data") || "";
+        return params.get("invite") || params.get("data") || "";
+      }
+
+      function exportTripForInvite(trip) {
+        return {
+          id: trip.id,
+          name: trip.name,
+          destination: trip.destination,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+          participantsLimit: trip.participantsLimit,
+          budgetPerPerson: trip.budgetPerPerson,
+          ownerProfileId: trip.ownerProfileId,
+          createdAt: trip.createdAt,
+          participants: trip.participants.map((item) => ({
+            id: item.id,
+            profileId: item.profileId,
+            name: item.name,
+            role: item.role,
+            online: false,
+            checkedIn: false,
+          })),
+          accommodations: trip.accommodations.map((item) => ({
+            id: item.id,
+            source: item.source,
+            originalLink: item.originalLink,
+            name: item.name,
+            imageUrl: item.imageUrl,
+            location: item.location,
+            rating: item.rating,
+            totalPrice: item.totalPrice,
+            pricePerPerson: item.pricePerPerson,
+            breakfast: item.breakfast,
+            createdAt: item.createdAt,
+          })),
+          votes: [],
+          documents: [],
+        };
       }
 
       function serializeTripData(trip) {
         try {
-          return btoa(unescape(encodeURIComponent(JSON.stringify(trip))));
+          return btoa(unescape(encodeURIComponent(JSON.stringify(exportTripForInvite(trip)))));
         } catch {
           return "";
         }
@@ -1027,7 +1064,7 @@
         params.set("trip", tripId);
         if (tripData) {
           const encoded = serializeTripData(tripData);
-          if (encoded) params.set("data", encoded);
+          if (encoded) params.set("invite", encoded);
         }
         history.replaceState(null, "", `${window.location.pathname}#${params.toString()}`);
       }
@@ -1039,7 +1076,7 @@
         params.set("trip", tripId);
         if (trip) {
           const encoded = serializeTripData(trip);
-          if (encoded) params.set("data", encoded);
+          if (encoded) params.set("invite", encoded);
         }
         return `${window.location.href.split("#")[0]}#${params.toString()}`;
       }
@@ -1275,6 +1312,37 @@
           reader.onerror = () => reject(new Error("Não foi possível ler o arquivo."));
           reader.readAsDataURL(file);
         });
+      }
+
+      function openDocumentAttachment(docId) {
+        const { trip } = currentTripSnapshot();
+        if (!trip) return;
+        const doc = trip.documents.find((item) => item.id === docId);
+        if (!doc || !doc.fileDataUrl) {
+          window.alert("Anexo não encontrado.");
+          return;
+        }
+
+        try {
+          const parts = doc.fileDataUrl.split(",");
+          if (parts.length < 2) {
+            window.open(doc.fileDataUrl, "_blank", "noopener,noreferrer");
+            return;
+          }
+          const mimeMatch = parts[0].match(/data:(.*?);base64/);
+          const mimeType = doc.fileMimeType || (mimeMatch ? mimeMatch[1] : "application/pdf");
+          const binary = atob(parts[1]);
+          const bytes = new Uint8Array(binary.length);
+          for (let index = 0; index < binary.length; index += 1) {
+            bytes[index] = binary.charCodeAt(index);
+          }
+          const blob = new Blob([bytes], { type: mimeType });
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, "_blank", "noopener,noreferrer");
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+        } catch {
+          window.open(doc.fileDataUrl, "_blank", "noopener,noreferrer");
+        }
       }
 
       async function addDocument(tripId, form) {
@@ -1560,6 +1628,9 @@
                 <button type="button" class="button-soft" id="go-home">Nova viagem</button>
               </div>
             </div>
+            <div class="pill-row" style="margin-top:18px;">
+              <div class="stat-pill">ID da viagem: <strong>${trip.id}</strong></div>
+            </div>
 
             <div class="stats-grid">
               <div class="mini-card stat-card">
@@ -1762,7 +1833,7 @@
                       </div>
                       <div class="muted-line">${doc.fileName}</div>
                     </div>
-                    ${doc.fileDataUrl ? `<div class="pill-row" style="margin-top:12px;"><a class="stat-pill" href="${doc.fileDataUrl}" target="_blank" rel="noreferrer">Abrir anexo</a></div>` : ""}
+                    ${doc.fileDataUrl ? `<div class="pill-row" style="margin-top:12px;"><button type="button" class="button-soft" data-open-doc="${doc.id}">Abrir anexo</button></div>` : ""}
                     ${doc.notes ? `<div class="section-copy" style="margin-top:12px;">${doc.notes}</div>` : ""}
                   </article>
                 `).join("") : `<div class="empty">Ainda não há documentos anexados. Assim que você incluir hotel, voos, trem ou vouchers, a timeline começa a ser montada automaticamente.</div>`}
@@ -1787,7 +1858,7 @@
                       </div>
                       <div class="muted-line">${item.fileName}</div>
                     </div>
-                    ${item.fileDataUrl ? `<div class="pill-row" style="margin-top:12px;"><a class="stat-pill" href="${item.fileDataUrl}" target="_blank" rel="noreferrer">Abrir anexo</a></div>` : ""}
+                    ${item.fileDataUrl ? `<div class="pill-row" style="margin-top:12px;"><button type="button" class="button-soft" data-open-doc="${item.id}">Abrir anexo</button></div>` : ""}
                     ${item.notes ? `<div class="section-copy" style="margin-top:12px;">${item.notes}</div>` : ""}
                   </article>
                 `).join("") : `<div class="empty">A timeline aparece automaticamente à medida que você adiciona comprovantes e reservas.</div>`}
@@ -1954,12 +2025,12 @@
         const copyButton = document.getElementById("copy-link");
         if (copyButton) {
           copyButton.onclick = async () => {
-            const link = buildShareLink(tripId);
+            const link = `${window.location.href.split("#")[0]}#trip=${tripId}`;
             try {
               await navigator.clipboard.writeText(link);
-              window.alert("Link copiado.");
+              window.alert(`Link curto copiado. ID da viagem: ${tripId}`);
             } catch {
-              window.alert(link);
+              window.alert(`Link: ${link}\nID da viagem: ${tripId}`);
             }
           };
         }
@@ -1967,12 +2038,12 @@
         const shareButton = document.getElementById("share-link");
         if (shareButton) {
           shareButton.onclick = async () => {
-            const link = buildShareLink(tripId);
+            const link = `${window.location.href.split("#")[0]}#trip=${tripId}`;
             try {
               await navigator.clipboard.writeText(link);
-              window.alert("Link da viagem pronto para compartilhar.");
+              window.alert(`Link curto pronto para compartilhar.\nID da viagem: ${tripId}`);
             } catch {
-              window.alert(link);
+              window.alert(`Link: ${link}\nID da viagem: ${tripId}`);
             }
           };
         }
@@ -2034,6 +2105,12 @@
           button.onclick = () => {
             editAccommodation(tripId, button.getAttribute("data-edit-stay"));
             renderWorkspace("selection");
+          };
+        });
+
+        document.querySelectorAll("[data-open-doc]").forEach((button) => {
+          button.onclick = () => {
+            openDocumentAttachment(button.getAttribute("data-open-doc"));
           };
         });
 
