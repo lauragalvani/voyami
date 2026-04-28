@@ -985,10 +985,89 @@
         return params.get("trip") || "";
       }
 
-      function setTripHash(tripId) {
+      function parseSharedTripDataFromHash() {
+        const hash = window.location.hash.replace(/^#/, "");
+        const params = new URLSearchParams(hash);
+        return params.get("data") || "";
+      }
+
+      function serializeTripData(trip) {
+        try {
+          return btoa(unescape(encodeURIComponent(JSON.stringify(trip))));
+        } catch {
+          return "";
+        }
+      }
+
+      function deserializeTripData(value) {
+        try {
+          return JSON.parse(decodeURIComponent(escape(atob(value))));
+        } catch {
+          return null;
+        }
+      }
+
+      function importSharedTripFromHash() {
+        const tripId = parseTripIdFromHash();
+        const encoded = parseSharedTripDataFromHash();
+        if (!tripId || !encoded) return;
+
+        const state = readStore();
+        if (state.trips[tripId]) return;
+
+        const trip = deserializeTripData(encoded);
+        if (!trip || trip.id !== tripId) return;
+
+        state.trips[tripId] = trip;
+        writeStore(state);
+      }
+
+      function setTripHash(tripId, tripData = null) {
         const params = new URLSearchParams();
         params.set("trip", tripId);
+        if (tripData) {
+          const encoded = serializeTripData(tripData);
+          if (encoded) params.set("data", encoded);
+        }
         history.replaceState(null, "", `${window.location.pathname}#${params.toString()}`);
+      }
+
+      function buildShareLink(tripId) {
+        const state = readStore();
+        const trip = state.trips[tripId];
+        const params = new URLSearchParams();
+        params.set("trip", tripId);
+        if (trip) {
+          const encoded = serializeTripData(trip);
+          if (encoded) params.set("data", encoded);
+        }
+        return `${window.location.href.split("#")[0]}#${params.toString()}`;
+      }
+
+      function importSharedTripFromInput(rawValue) {
+        if (!rawValue) return "";
+        let parsedTripId = "";
+        let encoded = "";
+
+        if (rawValue.includes("#")) {
+          const hash = rawValue.split("#")[1] || "";
+          const params = new URLSearchParams(hash);
+          parsedTripId = params.get("trip") || "";
+          encoded = params.get("data") || "";
+        } else if (rawValue.startsWith("trip_")) {
+          parsedTripId = rawValue.trim();
+        }
+
+        if (parsedTripId && encoded) {
+          const trip = deserializeTripData(encoded);
+          if (trip && trip.id === parsedTripId) {
+            const state = readStore();
+            state.trips[parsedTripId] = trip;
+            writeStore(state);
+          }
+        }
+
+        return parsedTripId;
       }
 
       function clearTripHash() {
@@ -1105,7 +1184,7 @@
       }
 
       function createTrip(payload) {
-        const profile = ensureProfile(payload.organizerName, payload.organizerEmail || "");
+        const profile = ensureProfile(payload.organizerName, payload.organizerEmail);
         const state = readStore();
         const tripId = uid("trip");
         state.trips[tripId] = {
@@ -1133,10 +1212,11 @@
           documents: [],
         };
         writeStore(state);
-        setTripHash(tripId);
+        setTripHash(tripId, state.trips[tripId]);
       }
 
-      function joinTrip(tripId, name, email = "") {
+      function joinTrip(tripId, name, email) {
+        if (!email || !email.trim()) return false;
         const profile = ensureProfile(name, email);
         const state = readStore();
         const trip = state.trips[tripId];
@@ -1188,10 +1268,33 @@
         writeStore(state);
       }
 
-      function addDocument(tripId, form) {
+      function readFileAsDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("Não foi possível ler o arquivo."));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function addDocument(tripId, form) {
         const state = readStore();
         const trip = state.trips[tripId];
         if (!trip) return;
+
+        let fileDataUrl = "";
+        let fileMimeType = "";
+        let fileName = "Sem arquivo";
+
+        if (form.file && form.file.size > 0) {
+          if (form.file.size > 2.5 * 1024 * 1024) {
+            throw new Error("O PDF é grande demais para esta versão web. Use um arquivo de até 2,5 MB.");
+          }
+          fileDataUrl = await readFileAsDataUrl(form.file);
+          fileMimeType = form.file.type || "application/pdf";
+          fileName = form.file.name || "documento.pdf";
+        }
+
         trip.documents.push({
           id: uid("doc"),
           type: form.type,
@@ -1200,7 +1303,9 @@
           date: form.date,
           time: form.time,
           notes: form.notes,
-          fileName: form.fileName || "Sem arquivo",
+          fileName,
+          fileDataUrl,
+          fileMimeType,
           createdAt: new Date().toISOString(),
         });
         writeStore(state);
@@ -1375,7 +1480,7 @@
               </label>
               <label>
                 <span>E-mail</span>
-                <input name="organizerEmail" type="email" placeholder="voce@email.com" />
+                <input name="organizerEmail" type="email" placeholder="voce@email.com" required />
               </label>
             </div>
             <label>
@@ -1414,8 +1519,8 @@
       function renderJoinForm() {
         return `
           <div class="eyebrow" style="margin-top:22px;">Entrar em uma viagem</div>
-          <h2 class="section-title">Acesse o grupo pelo link compartilhado</h2>
-          <p class="section-copy">Cole o identificador da viagem ou o link recebido e entre com seu nome.</p>
+          <h2 class="section-title">Cadastre-se para entrar no grupo</h2>
+          <p class="section-copy">Cole o link recebido, crie seu usuário com nome e e-mail e então entre no projeto.</p>
           <form id="join-trip-form" class="form-grid">
             <label>
               <span>Código ou link da viagem</span>
@@ -1427,9 +1532,9 @@
             </label>
             <label>
               <span>E-mail</span>
-              <input name="email" type="email" placeholder="Opcional" />
+              <input name="email" type="email" placeholder="Seu e-mail para cadastro" required />
             </label>
-            <button type="submit" class="button-secondary button-block">Entrar em uma viagem</button>
+            <button type="submit" class="button-secondary button-block">Cadastrar e entrar</button>
           </form>
         `;
       }
@@ -1634,9 +1739,12 @@
                     <input name="time" type="time" />
                   </label>
                   <label>
-                    <span>Arquivo</span>
-                    <input name="fileName" placeholder="Ex.: voo-budapeste.pdf" />
+                    <span>Upload do PDF</span>
+                    <input name="file" type="file" accept="application/pdf" />
                   </label>
+                </div>
+                <div class="notice" style="margin-top:0;">
+                  Nesta versão web estática, o PDF fica salvo no próprio navegador. Para funcionar bem, use arquivos de até 2,5 MB.
                 </div>
                 <label>
                   <span>Observações</span>
@@ -1654,6 +1762,7 @@
                       </div>
                       <div class="muted-line">${doc.fileName}</div>
                     </div>
+                    ${doc.fileDataUrl ? `<div class="pill-row" style="margin-top:12px;"><a class="stat-pill" href="${doc.fileDataUrl}" target="_blank" rel="noreferrer">Abrir anexo</a></div>` : ""}
                     ${doc.notes ? `<div class="section-copy" style="margin-top:12px;">${doc.notes}</div>` : ""}
                   </article>
                 `).join("") : `<div class="empty">Ainda não há documentos anexados. Assim que você incluir hotel, voos, trem ou vouchers, a timeline começa a ser montada automaticamente.</div>`}
@@ -1678,6 +1787,7 @@
                       </div>
                       <div class="muted-line">${item.fileName}</div>
                     </div>
+                    ${item.fileDataUrl ? `<div class="pill-row" style="margin-top:12px;"><a class="stat-pill" href="${item.fileDataUrl}" target="_blank" rel="noreferrer">Abrir anexo</a></div>` : ""}
                     ${item.notes ? `<div class="section-copy" style="margin-top:12px;">${item.notes}</div>` : ""}
                   </article>
                 `).join("") : `<div class="empty">A timeline aparece automaticamente à medida que você adiciona comprovantes e reservas.</div>`}
@@ -1815,11 +1925,10 @@
             event.preventDefault();
             const data = new FormData(joinForm);
             let tripId = data.get("tripId").toString().trim();
-            if (tripId.includes("#trip=")) {
-              tripId = tripId.split("#trip=")[1].split(/[&?]/)[0];
-            }
-            if (tripId.includes("/trip/")) {
-              tripId = tripId.split("/trip/")[1].split(/[?#]/)[0];
+            const importedTripId = importSharedTripFromInput(tripId);
+            if (importedTripId) tripId = importedTripId;
+            if (!tripId && data.get("tripId")) {
+              tripId = data.get("tripId").toString().trim();
             }
             const ok = joinTrip(
               tripId,
@@ -1827,10 +1936,11 @@
               data.get("email").toString(),
             );
             if (!ok) {
-              window.alert("Viagem não encontrada. Verifique o link compartilhado.");
+              window.alert("Não foi possível entrar. Verifique o link compartilhado e preencha seu e-mail de cadastro.");
               return;
             }
-            setTripHash(tripId);
+            const state = readStore();
+            setTripHash(tripId, state.trips[tripId]);
             renderWorkspace("selection");
           };
         }
@@ -1844,7 +1954,7 @@
         const copyButton = document.getElementById("copy-link");
         if (copyButton) {
           copyButton.onclick = async () => {
-            const link = `${window.location.href.split("#")[0]}#trip=${tripId}`;
+            const link = buildShareLink(tripId);
             try {
               await navigator.clipboard.writeText(link);
               window.alert("Link copiado.");
@@ -1857,7 +1967,7 @@
         const shareButton = document.getElementById("share-link");
         if (shareButton) {
           shareButton.onclick = async () => {
-            const link = `${window.location.href.split("#")[0]}#trip=${tripId}`;
+            const link = buildShareLink(tripId);
             try {
               await navigator.clipboard.writeText(link);
               window.alert("Link da viagem pronto para compartilhar.");
@@ -1929,19 +2039,23 @@
 
         const documentForm = document.getElementById("document-form");
         if (documentForm) {
-          documentForm.onsubmit = (event) => {
+          documentForm.onsubmit = async (event) => {
             event.preventDefault();
             const data = new FormData(documentForm);
-            addDocument(tripId, {
-              type: data.get("type").toString(),
-              title: data.get("title").toString(),
-              city: data.get("city").toString(),
-              date: data.get("date").toString(),
-              time: data.get("time").toString(),
-              notes: data.get("notes").toString(),
-              fileName: data.get("fileName").toString(),
-            });
-            renderWorkspace("documents");
+            try {
+              await addDocument(tripId, {
+                type: data.get("type").toString(),
+                title: data.get("title").toString(),
+                city: data.get("city").toString(),
+                date: data.get("date").toString(),
+                time: data.get("time").toString(),
+                notes: data.get("notes").toString(),
+                file: data.get("file"),
+              });
+              renderWorkspace("documents");
+            } catch (error) {
+              window.alert(error.message || "Não foi possível anexar o PDF.");
+            }
           };
         }
 
@@ -1967,13 +2081,20 @@
           joinForm.onsubmit = (event) => {
             event.preventDefault();
             const data = new FormData(joinForm);
-            joinTrip(tripId, data.get("name").toString(), data.get("email").toString());
+            const ok = joinTrip(tripId, data.get("name").toString(), data.get("email").toString());
+            if (!ok) {
+              window.alert("Preencha nome e e-mail para criar seu cadastro e entrar no projeto.");
+              return;
+            }
+            const state = readStore();
+            setTripHash(tripId, state.trips[tripId]);
             renderWorkspace(activeTab);
           };
         }
       }
 
       function renderApp() {
+        importSharedTripFromHash();
         const tripId = parseTripIdFromHash();
         if (tripId && readStore().trips[tripId]) {
           renderWorkspace("selection");
