@@ -1,0 +1,1991 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VOYAMI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #faf7f5;
+        --bg-soft: #f3eeeb;
+        --surface: rgba(255, 255, 255, 0.84);
+        --surface-solid: #ffffff;
+        --line: rgba(51, 51, 51, 0.1);
+        --text: #333333;
+        --muted: rgba(51, 51, 51, 0.62);
+        --rose: #cfa7b5;
+        --rose-soft: #f5e7ed;
+        --sage: #8fbf9f;
+        --champagne: #c9a66b;
+        --shadow: 0 22px 56px rgba(51, 51, 51, 0.08);
+        --radius-xl: 30px;
+        --radius-lg: 24px;
+        --radius-md: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family: "Manrope", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(207, 167, 181, 0.24), transparent 26%),
+          radial-gradient(circle at top right, rgba(201, 166, 107, 0.12), transparent 28%),
+          linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .app {
+        max-width: 1380px;
+        margin: 0 auto;
+        min-height: 100vh;
+        padding: 24px;
+      }
+
+      .panel,
+      .sub-panel,
+      .stay-card,
+      .timeline-card,
+      .doc-card,
+      .mini-card {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .panel {
+        border-radius: var(--radius-xl);
+      }
+
+      .sub-panel,
+      .stay-card,
+      .timeline-card,
+      .doc-card,
+      .mini-card {
+        border-radius: var(--radius-lg);
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .hero {
+        padding: 28px;
+      }
+
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: rgba(51, 51, 51, 0.45);
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      .hero-title {
+        margin-top: 14px;
+        max-width: 860px;
+        font-size: clamp(38px, 6vw, 72px);
+        line-height: 0.96;
+        letter-spacing: -0.07em;
+        font-weight: 800;
+      }
+
+      .hero-copy {
+        margin-top: 18px;
+        max-width: 720px;
+        font-size: 17px;
+        line-height: 1.75;
+        color: var(--muted);
+      }
+
+      .hero-grid,
+      .landing-grid,
+      .workspace-grid,
+      .stats-grid,
+      .selection-grid,
+      .summary-grid {
+        display: grid;
+        gap: 20px;
+      }
+
+      .hero-grid {
+        grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
+        align-items: center;
+      }
+
+      .hero-cards {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .mini-card {
+        padding: 18px;
+      }
+
+      .mini-icon {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        background: var(--rose-soft);
+        font-size: 20px;
+      }
+
+      .mini-title {
+        margin-top: 16px;
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+
+      .mini-copy {
+        margin-top: 8px;
+        font-size: 14px;
+        line-height: 1.65;
+        color: var(--muted);
+      }
+
+      .landing-grid {
+        margin-top: 22px;
+        grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+      }
+
+      .panel-body {
+        padding: 26px;
+      }
+
+      .section-title {
+        margin-top: 8px;
+        font-size: clamp(28px, 4vw, 40px);
+        letter-spacing: -0.05em;
+        line-height: 1.02;
+        font-weight: 800;
+      }
+
+      .section-copy {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .tab-row,
+      .pill-row,
+      .action-row,
+      .topbar,
+      .header-actions,
+      .participants-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .tab-row {
+        margin-top: 18px;
+      }
+
+      .tab-btn,
+      .button-primary,
+      .button-secondary,
+      .button-soft,
+      .circle-action {
+        border-radius: 999px;
+        transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+      }
+
+      .tab-btn:hover,
+      .button-primary:hover,
+      .button-secondary:hover,
+      .button-soft:hover,
+      .circle-action:hover {
+        transform: translateY(-1px);
+      }
+
+      .tab-btn {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--muted);
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .tab-btn.active {
+        background: var(--text);
+        border-color: var(--text);
+        color: #fff;
+      }
+
+      .button-primary,
+      .button-secondary,
+      .button-soft {
+        border: 0;
+        padding: 13px 18px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .button-primary {
+        background: var(--text);
+        color: #fff;
+      }
+
+      .button-secondary {
+        background: #fff;
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      .button-soft {
+        background: var(--rose-soft);
+        color: var(--text);
+      }
+
+      .button-block {
+        width: 100%;
+        justify-content: center;
+      }
+
+      form {
+        margin-top: 20px;
+      }
+
+      .form-grid,
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        display: grid;
+        gap: 14px;
+      }
+
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      label {
+        display: block;
+      }
+
+      label span {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        color: rgba(51, 51, 51, 0.64);
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--text);
+        border-radius: 18px;
+        padding: 14px 15px;
+        outline: none;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border-color: var(--rose);
+        box-shadow: 0 0 0 4px rgba(207, 167, 181, 0.16);
+      }
+
+      textarea {
+        min-height: 118px;
+        resize: vertical;
+      }
+
+      .stat-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: #fff;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        color: rgba(51, 51, 51, 0.7);
+      }
+
+      .how-list {
+        margin-top: 18px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .how-item {
+        padding: 16px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--line);
+      }
+
+      .how-item p {
+        font-size: 14px;
+        line-height: 1.7;
+        color: var(--muted);
+      }
+
+      .workspace-grid {
+        margin-top: 22px;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        align-items: start;
+      }
+
+      .topbar {
+        justify-content: space-between;
+      }
+
+      .brand {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.06em;
+      }
+
+      .workspace-title {
+        margin-top: 12px;
+        font-size: clamp(32px, 4vw, 48px);
+        letter-spacing: -0.06em;
+        font-weight: 800;
+        line-height: 0.98;
+      }
+
+      .workspace-copy {
+        margin-top: 12px;
+        font-size: 15px;
+        line-height: 1.75;
+        color: var(--muted);
+      }
+
+      .stats-grid {
+        margin-top: 20px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .stat-card {
+        padding: 20px;
+      }
+
+      .stat-value {
+        margin-top: 14px;
+        font-size: 30px;
+        line-height: 1;
+        letter-spacing: -0.05em;
+        font-weight: 800;
+      }
+
+      .stat-copy {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .content-tabs {
+        margin-top: 20px;
+        padding: 12px;
+      }
+
+      .selection-grid {
+        margin-top: 20px;
+      }
+
+      .stay-card {
+        overflow: hidden;
+        padding: 16px;
+      }
+
+      .stay-layout {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 220px minmax(0, 1fr);
+      }
+
+      .stay-card img,
+      .swipe-image {
+        width: 100%;
+        object-fit: cover;
+        border-radius: 22px;
+        display: block;
+      }
+
+      .stay-card img {
+        height: 220px;
+      }
+
+      .stay-head,
+      .swipe-head,
+      .ranking-head,
+      .doc-head,
+      .timeline-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      .stay-name,
+      .swipe-name,
+      .ranking-name {
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: -0.05em;
+        font-weight: 800;
+      }
+
+      .muted-line {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .price-block {
+        text-align: right;
+      }
+
+      .price {
+        font-size: 26px;
+        line-height: 1;
+        letter-spacing: -0.05em;
+        font-weight: 800;
+      }
+
+      .price-sub {
+        margin-top: 7px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .stay-actions {
+        margin-top: 18px;
+      }
+
+      .progress-wrap {
+        margin-top: 20px;
+      }
+
+      .progress-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .progress {
+        margin-top: 10px;
+        height: 12px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(51, 51, 51, 0.08);
+      }
+
+      .progress > div {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--rose), var(--champagne), var(--sage));
+      }
+
+      .swipe-card {
+        margin-top: 20px;
+        padding: 16px;
+      }
+
+      .swipe-image-wrap {
+        position: relative;
+      }
+
+      .swipe-image {
+        height: 440px;
+      }
+
+      .rating-chip,
+      .source-chip {
+        position: absolute;
+        top: 16px;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .rating-chip {
+        right: 16px;
+        background: var(--sage);
+        color: #fff;
+      }
+
+      .source-chip {
+        left: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--text);
+      }
+
+      .swipe-content {
+        padding: 18px 4px 2px;
+      }
+
+      .summary-grid {
+        margin-top: 18px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .summary-box {
+        padding: 16px;
+      }
+
+      .summary-label {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(51, 51, 51, 0.46);
+      }
+
+      .summary-value {
+        margin-top: 8px;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .action-row {
+        justify-content: center;
+        margin-top: 22px;
+      }
+
+      .circle-action {
+        width: 68px;
+        height: 68px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        background: #fff;
+        font-size: 24px;
+        box-shadow: 0 12px 24px rgba(51, 51, 51, 0.08);
+      }
+
+      .circle-action.like {
+        color: var(--rose);
+      }
+
+      .circle-action.favorite {
+        background: #fbf2e4;
+        color: var(--champagne);
+      }
+
+      .circle-action.discard {
+        color: #d95b75;
+      }
+
+      .ranking-list,
+      .docs-list,
+      .timeline-list,
+      .notifications-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .ranking-item,
+      .doc-card,
+      .timeline-card {
+        padding: 16px;
+      }
+
+      .support-list {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .support-pill {
+        display: inline-flex;
+        border-radius: 999px;
+        padding: 7px 10px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .support-pill.favorite {
+        background: #fbf2e4;
+        color: #7f6332;
+      }
+
+      .support-pill.like {
+        background: var(--rose-soft);
+        color: #9f6e81;
+      }
+
+      .support-pill.discard {
+        background: #fdecef;
+        color: #d95b75;
+      }
+
+      .empty {
+        padding: 18px;
+        border-radius: 20px;
+        border: 1px dashed rgba(51, 51, 51, 0.16);
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .sidebar {
+        display: grid;
+        gap: 18px;
+      }
+
+      .profile-card,
+      .notifications-card {
+        padding: 22px;
+      }
+
+      .profile-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .avatar {
+        width: 58px;
+        height: 58px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--rose-soft);
+        color: var(--rose);
+        font-weight: 800;
+        font-size: 20px;
+      }
+
+      .side-title {
+        font-size: 19px;
+        letter-spacing: -0.04em;
+        font-weight: 800;
+      }
+
+      .side-copy {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .participants-row {
+        margin-top: 18px;
+      }
+
+      .participant {
+        min-width: 96px;
+        padding: 12px;
+        text-align: center;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .participant-avatar {
+        width: 38px;
+        height: 38px;
+        margin: 0 auto;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        background: var(--rose-soft);
+        color: var(--rose);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .participant-name {
+        margin-top: 8px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .participant-status {
+        margin-top: 4px;
+        font-size: 11px;
+        color: var(--sage);
+        font-weight: 700;
+      }
+
+      .trip-list {
+        margin-top: 14px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .trip-chip {
+        padding: 14px;
+      }
+
+      .notice {
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: var(--rose-soft);
+        color: var(--text);
+        font-size: 13px;
+      }
+
+      .footer-note {
+        margin-top: 18px;
+        color: rgba(51, 51, 51, 0.48);
+        font-size: 12px;
+      }
+
+      @media (max-width: 1120px) {
+        .hero-grid,
+        .landing-grid,
+        .workspace-grid,
+        .stats-grid,
+        .stay-layout,
+        .grid-4,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .app {
+          padding: 14px;
+        }
+
+        .hero,
+        .panel-body {
+          padding: 20px;
+        }
+
+        .hero-cards,
+        .grid-2,
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar,
+        .stay-head,
+        .swipe-head,
+        .ranking-head,
+        .doc-head,
+        .timeline-head,
+        .header-actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .price-block {
+          text-align: left;
+        }
+
+        .swipe-image {
+          height: 290px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app"></div>
+
+    <script>
+      const STORE_KEY = "voyami-static-web-v1";
+      const PROFILE_KEY = "voyami-static-profile-v1";
+
+      const MOCK_STAYS = [
+        {
+          name: "Aurora Suites Danube",
+          location: "Budapeste, Hungria",
+          rating: 4.9,
+          totalPrice: 6800,
+          breakfast: true,
+          imageUrl:
+            "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+        },
+        {
+          name: "Velvet Courtyard Vienna",
+          location: "Viena, Áustria",
+          rating: 4.8,
+          totalPrice: 7350,
+          breakfast: true,
+          imageUrl:
+            "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
+        },
+        {
+          name: "Golden Tram Residence",
+          location: "Praga, República Tcheca",
+          rating: 4.7,
+          totalPrice: 6200,
+          breakfast: false,
+          imageUrl:
+            "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+        },
+        {
+          name: "Riverside Social Loft",
+          location: "Bratislava, Eslováquia",
+          rating: 4.6,
+          totalPrice: 5400,
+          breakfast: true,
+          imageUrl:
+            "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80",
+        },
+        {
+          name: "Champagne Hall Apartments",
+          location: "Cracóvia, Polônia",
+          rating: 4.8,
+          totalPrice: 5900,
+          breakfast: false,
+          imageUrl:
+            "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80",
+        },
+      ];
+
+      const DOCUMENT_TYPES = [
+        "Hotel",
+        "Voo",
+        "Trem",
+        "Voucher",
+        "Seguro viagem",
+        "Restaurante",
+        "Ingresso",
+      ];
+
+      const TIMELINE_ICONS = {
+        Hotel: "🏨",
+        Voo: "✈️",
+        Trem: "🚆",
+        Voucher: "🎫",
+        "Seguro viagem": "🛡️",
+        Restaurante: "🍽️",
+        Ingresso: "🎟️",
+      };
+
+      function readStore() {
+        try {
+          return JSON.parse(localStorage.getItem(STORE_KEY)) || { profiles: [], trips: {} };
+        } catch {
+          return { profiles: [], trips: {} };
+        }
+      }
+
+      function writeStore(state) {
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      }
+
+      function uid(prefix) {
+        if (window.crypto && crypto.randomUUID) return `${prefix}_${crypto.randomUUID()}`;
+        return `${prefix}_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+      }
+
+      function formatCurrency(value) {
+        return new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+          maximumFractionDigits: 0,
+        }).format(Number(value) || 0);
+      }
+
+      function formatDate(value) {
+        if (!value) return "--";
+        return new Intl.DateTimeFormat("pt-BR", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).format(new Date(`${value}T12:00:00`));
+      }
+
+      function formatTime(value) {
+        return value ? value.slice(0, 5) : "--";
+      }
+
+      function initials(name) {
+        return (name || "VO")
+          .split(" ")
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((part) => part[0].toUpperCase())
+          .join("");
+      }
+
+      function currentProfileId() {
+        return localStorage.getItem(PROFILE_KEY) || "";
+      }
+
+      function setCurrentProfileId(profileId) {
+        localStorage.setItem(PROFILE_KEY, profileId);
+      }
+
+      function getCurrentProfile(state = readStore()) {
+        return state.profiles.find((profile) => profile.id === currentProfileId()) || null;
+      }
+
+      function ensureProfile(name, email = "") {
+        const state = readStore();
+        const cleanName = name.trim();
+        let profile = state.profiles.find((item) => item.name === cleanName && item.email === email);
+        if (!profile) {
+          profile = {
+            id: uid("profile"),
+            name: cleanName,
+            email,
+            createdAt: new Date().toISOString(),
+          };
+          state.profiles.push(profile);
+          writeStore(state);
+        }
+        setCurrentProfileId(profile.id);
+        return profile;
+      }
+
+      function parseTripIdFromHash() {
+        const hash = window.location.hash.replace(/^#/, "");
+        const params = new URLSearchParams(hash);
+        return params.get("trip") || "";
+      }
+
+      function setTripHash(tripId) {
+        const params = new URLSearchParams();
+        params.set("trip", tripId);
+        history.replaceState(null, "", `${window.location.pathname}#${params.toString()}`);
+      }
+
+      function clearTripHash() {
+        history.replaceState(null, "", window.location.pathname);
+      }
+
+      function profileTrips(profileId) {
+        return Object.values(readStore().trips).filter((trip) =>
+          trip.participants.some((participant) => participant.profileId === profileId),
+        );
+      }
+
+      function timelineFromTrip(trip) {
+        return [...trip.documents]
+          .sort((a, b) => {
+            const left = new Date(`${a.date || "2100-01-01"}T${a.time || "12:00"}`).getTime();
+            const right = new Date(`${b.date || "2100-01-01"}T${b.time || "12:00"}`).getTime();
+            return left - right;
+          })
+          .map((doc) => ({
+            ...doc,
+            icon: TIMELINE_ICONS[doc.type] || "📍",
+          }));
+      }
+
+      function rankingFromTrip(trip) {
+        return trip.accommodations
+          .map((stay) => {
+            const votes = trip.votes.filter((vote) => vote.accommodationId === stay.id);
+            return {
+              ...stay,
+              points: votes.reduce((sum, vote) => sum + vote.score, 0),
+              likes: votes.filter((vote) => vote.voteType === "like").length,
+              favorites: votes.filter((vote) => vote.voteType === "favorite").length,
+              discards: votes.filter((vote) => vote.voteType === "discard").length,
+              supporters: {
+                favorite: votes.filter((vote) => vote.voteType === "favorite").map((vote) => vote.participantName),
+                like: votes.filter((vote) => vote.voteType === "like").map((vote) => vote.participantName),
+                discard: votes.filter((vote) => vote.voteType === "discard").map((vote) => vote.participantName),
+              },
+            };
+          })
+          .sort((left, right) => right.points - left.points || right.rating - left.rating);
+      }
+
+      function notificationsFromTrip(trip) {
+        const timeline = timelineFromTrip(trip);
+        const participants = trip.participants.slice(0, 2).map((item) => `${item.name} já entrou na viagem`);
+        return [
+          `${trip.name} começa em ${formatDate(trip.startDate)}`,
+          "Seu check-in de voo abre em 2 horas",
+          "Faltam 24h para o check-out",
+          ...participants,
+          ...timeline.slice(0, 2).map((event) => `${event.icon} ${event.title} em ${event.city}`),
+        ].slice(0, 6);
+      }
+
+      function participantForTrip(trip, profileId) {
+        return trip.participants.find((participant) => participant.profileId === profileId) || null;
+      }
+
+      function prettifySlug(value) {
+        return (value || "")
+          .replace(/[-_]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .replace(/\b\w/g, (char) => char.toUpperCase());
+      }
+
+      function inferStayNameFromUrl(url) {
+        try {
+          const parsed = new URL(url);
+          const segments = parsed.pathname.split("/").filter(Boolean);
+          const candidate = [...segments]
+            .reverse()
+            .find((segment) => /[a-zA-Z]{3,}/.test(segment) && !/^\d+$/.test(segment));
+          return prettifySlug(candidate || "");
+        } catch {
+          return "";
+        }
+      }
+
+      function inferLocationFromUrl(url) {
+        try {
+          const parsed = new URL(url);
+          if (parsed.hostname.includes("booking")) return "Booking.com";
+          if (parsed.hostname.includes("airbnb")) return "Airbnb";
+          return "Origem externa";
+        } catch {
+          return "Origem externa";
+        }
+      }
+
+      function mockStayFromUrl(payload, peopleCount) {
+        const url = payload.url;
+        const index =
+          Math.abs([...url].reduce((sum, char) => sum + char.charCodeAt(0), 0)) % MOCK_STAYS.length;
+        const base = MOCK_STAYS[index];
+        const source = url.includes("airbnb") ? "Airbnb" : "Booking";
+        const inferredName = inferStayNameFromUrl(url);
+        return {
+          id: uid("stay"),
+          source,
+          originalLink: url,
+          name: payload.name || inferredName || base.name,
+          imageUrl: payload.imageUrl || base.imageUrl,
+          location: payload.location || base.location || inferLocationFromUrl(url),
+          rating: base.rating,
+          totalPrice: base.totalPrice,
+          pricePerPerson: Math.round(base.totalPrice / Math.max(Number(peopleCount) || 1, 1)),
+          breakfast: base.breakfast,
+          createdAt: new Date().toISOString(),
+        };
+      }
+
+      function createTrip(payload) {
+        const profile = ensureProfile(payload.organizerName, payload.organizerEmail || "");
+        const state = readStore();
+        const tripId = uid("trip");
+        state.trips[tripId] = {
+          id: tripId,
+          name: payload.name,
+          destination: payload.destination,
+          startDate: payload.startDate,
+          endDate: payload.endDate,
+          participantsLimit: Number(payload.participantsLimit),
+          budgetPerPerson: Number(payload.budgetPerPerson),
+          ownerProfileId: profile.id,
+          createdAt: new Date().toISOString(),
+          participants: [
+            {
+              id: uid("participant"),
+              profileId: profile.id,
+              name: profile.name,
+              role: "organizer",
+              online: true,
+              checkedIn: false,
+            },
+          ],
+          accommodations: [],
+          votes: [],
+          documents: [],
+        };
+        writeStore(state);
+        setTripHash(tripId);
+      }
+
+      function joinTrip(tripId, name, email = "") {
+        const profile = ensureProfile(name, email);
+        const state = readStore();
+        const trip = state.trips[tripId];
+        if (!trip) return false;
+        let participant = participantForTrip(trip, profile.id);
+        if (!participant) {
+          participant = {
+            id: uid("participant"),
+            profileId: profile.id,
+            name: profile.name,
+            role: "guest",
+            online: true,
+            checkedIn: false,
+          };
+          trip.participants.push(participant);
+        } else {
+          participant.online = true;
+        }
+        writeStore(state);
+        return true;
+      }
+
+      function addAccommodation(tripId, payload) {
+        const state = readStore();
+        const trip = state.trips[tripId];
+        if (!trip || trip.accommodations.length >= 10) return;
+        trip.accommodations.push(mockStayFromUrl(payload, trip.participantsLimit));
+        writeStore(state);
+      }
+
+      function removeAccommodation(tripId, accommodationId) {
+        const state = readStore();
+        const trip = state.trips[tripId];
+        if (!trip) return;
+        trip.accommodations = trip.accommodations.filter((stay) => stay.id !== accommodationId);
+        trip.votes = trip.votes.filter((vote) => vote.accommodationId !== accommodationId);
+        writeStore(state);
+      }
+
+      function editAccommodation(tripId, accommodationId) {
+        const state = readStore();
+        const trip = state.trips[tripId];
+        if (!trip) return;
+        const stay = trip.accommodations.find((item) => item.id === accommodationId);
+        if (!stay) return;
+        const nextName = window.prompt("Editar nome da acomodação", stay.name);
+        if (!nextName || !nextName.trim()) return;
+        stay.name = nextName.trim();
+        writeStore(state);
+      }
+
+      function addDocument(tripId, form) {
+        const state = readStore();
+        const trip = state.trips[tripId];
+        if (!trip) return;
+        trip.documents.push({
+          id: uid("doc"),
+          type: form.type,
+          title: form.title,
+          city: form.city,
+          date: form.date,
+          time: form.time,
+          notes: form.notes,
+          fileName: form.fileName || "Sem arquivo",
+          createdAt: new Date().toISOString(),
+        });
+        writeStore(state);
+      }
+
+      function submitVote(tripId, accommodationId, voteType) {
+        const state = readStore();
+        const trip = state.trips[tripId];
+        const profile = getCurrentProfile(state);
+        if (!trip || !profile) return;
+        const participant = participantForTrip(trip, profile.id);
+        if (!participant) return;
+        const exists = trip.votes.find(
+          (vote) => vote.accommodationId === accommodationId && vote.participantId === participant.id,
+        );
+        if (exists) return;
+        const scores = { discard: 0, like: 1, favorite: 2 };
+        trip.votes.push({
+          id: uid("vote"),
+          accommodationId,
+          participantId: participant.id,
+          participantName: participant.name,
+          voteType,
+          score: scores[voteType],
+          createdAt: new Date().toISOString(),
+        });
+        writeStore(state);
+      }
+
+      function resetVotes(tripId) {
+        const state = readStore();
+        const trip = state.trips[tripId];
+        if (!trip) return;
+        trip.votes = [];
+        writeStore(state);
+      }
+
+      function toggleCheckIn(tripId) {
+        const state = readStore();
+        const trip = state.trips[tripId];
+        const profile = getCurrentProfile(state);
+        if (!trip || !profile) return;
+        const participant = participantForTrip(trip, profile.id);
+        if (!participant) return;
+        participant.checkedIn = !participant.checkedIn;
+        writeStore(state);
+      }
+
+      function currentTripSnapshot() {
+        const state = readStore();
+        const tripId = parseTripIdFromHash();
+        const trip = state.trips[tripId] || null;
+        const profile = getCurrentProfile(state);
+        const participant = trip && profile ? participantForTrip(trip, profile.id) : null;
+        const ranking = trip ? rankingFromTrip(trip) : [];
+        const timeline = trip ? timelineFromTrip(trip) : [];
+        const notifications = trip ? notificationsFromTrip(trip) : [];
+        const trips = profile ? profileTrips(profile.id) : [];
+        return {
+          tripId,
+          trip,
+          profile,
+          participant,
+          ranking,
+          timeline,
+          notifications,
+          activeTrips: trips,
+        };
+      }
+
+      function nextAccommodation(trip, participant) {
+        if (!trip || !participant) return null;
+        const voted = new Set(
+          trip.votes
+            .filter((vote) => vote.participantId === participant.id)
+            .map((vote) => vote.accommodationId),
+        );
+        return trip.accommodations.find((stay) => !voted.has(stay.id)) || null;
+      }
+
+      function votingProgress(trip, participant) {
+        if (!trip || !participant) return { current: 0, total: 0, percent: 0 };
+        const current = trip.votes.filter((vote) => vote.participantId === participant.id).length;
+        const total = trip.accommodations.length;
+        return {
+          current,
+          total,
+          percent: total ? Math.round((current / total) * 100) : 0,
+        };
+      }
+
+      function renderLanding(activeTab = "create") {
+        const app = document.getElementById("app");
+        app.innerHTML = `
+          <section class="panel hero">
+            <div class="hero-grid">
+              <div>
+                <div class="eyebrow">VOYAMI</div>
+                <h1 class="hero-title">Decidam a hospedagem em grupo. Organizem toda a viagem em um só lugar.</h1>
+                <p class="hero-copy">
+                  Swipe colaborativo para escolher onde ficar, documentos centralizados, linha do tempo automática
+                  e alertas inteligentes para a viagem fluir sem estresse.
+                </p>
+                <div class="pill-row" style="margin-top:20px;">
+                  <div class="stat-pill">Hospedagens estilo Tinder</div>
+                  <div class="stat-pill">Linha do tempo compartilhada</div>
+                  <div class="stat-pill">Documentos centralizados</div>
+                </div>
+              </div>
+              <div class="hero-cards">
+                <div class="mini-card">
+                  <div class="mini-icon">🏨</div>
+                  <div class="mini-title">Seleção inteligente</div>
+                  <div class="mini-copy">Cole links do Booking ou Airbnb e monte uma shortlist premium.</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mini-icon">🗂️</div>
+                  <div class="mini-title">Documentos em um hub</div>
+                  <div class="mini-copy">Hotel, voos, trem, vouchers e seguros organizados por viagem.</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mini-icon">🗓️</div>
+                  <div class="mini-title">Timeline automática</div>
+                  <div class="mini-copy">A viagem se monta sozinha com base nas reservas e comprovantes.</div>
+                </div>
+                <div class="mini-card">
+                  <div class="mini-icon">🔔</div>
+                  <div class="mini-title">Notificações úteis</div>
+                  <div class="mini-copy">Check-in, troca de cidade, embarque e movimento do grupo.</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="landing-grid">
+            <div class="panel panel-body">
+              <div class="tab-row">
+                <button type="button" class="tab-btn ${activeTab === "create" ? "active" : ""}" data-landing-tab="create">Criar nova viagem</button>
+                <button type="button" class="tab-btn ${activeTab === "join" ? "active" : ""}" data-landing-tab="join">Entrar em uma viagem</button>
+              </div>
+              ${activeTab === "create" ? renderCreateForm() : renderJoinForm()}
+            </div>
+
+            <div class="panel panel-body">
+              <div class="eyebrow">Fluxo do MVP</div>
+              <h2 class="section-title">Do swipe à organização da viagem</h2>
+              <div class="how-list">
+                <div class="how-item"><p>1. O organizador cria a viagem com destino, datas, participantes e orçamento.</p></div>
+                <div class="how-item"><p>2. Links de Booking ou Airbnb viram cards de acomodação automaticamente.</p></div>
+                <div class="how-item"><p>3. O grupo entra pelo link compartilhado e vota em tempo real.</p></div>
+                <div class="how-item"><p>4. O ranking final aponta a melhor opção para reservar.</p></div>
+                <div class="how-item"><p>5. Depois disso, documentos, timeline e alertas ficam centralizados no mesmo workspace.</p></div>
+              </div>
+              <div class="notice">Versão web estática: abre direto pelo arquivo HTML e salva tudo no navegador.</div>
+            </div>
+          </section>
+        `;
+
+        attachLandingHandlers(activeTab);
+      }
+
+      function renderCreateForm() {
+        return `
+          <div class="eyebrow" style="margin-top:22px;">Criar nova viagem</div>
+          <h2 class="section-title">Dê o tom da viagem do grupo</h2>
+          <p class="section-copy">Defina o destino, orçamento e a base da viagem. Depois disso, monte a seleção de hospedagens e compartilhe com todo mundo.</p>
+          <form id="create-trip-form" class="form-grid">
+            <div class="grid-2">
+              <label>
+                <span>Seu nome</span>
+                <input name="organizerName" placeholder="Quem está organizando?" required />
+              </label>
+              <label>
+                <span>E-mail</span>
+                <input name="organizerEmail" type="email" placeholder="voce@email.com" />
+              </label>
+            </div>
+            <label>
+              <span>Nome da viagem</span>
+              <input name="name" placeholder="Ex.: Leste Europeu com Amigos" required />
+            </label>
+            <div class="grid-2">
+              <label>
+                <span>Destino</span>
+                <input name="destination" placeholder="Budapeste, Viena, Praga..." required />
+              </label>
+              <label>
+                <span>Participantes</span>
+                <input name="participantsLimit" type="number" min="2" max="20" value="4" required />
+              </label>
+            </div>
+            <div class="grid-3">
+              <label>
+                <span>Data de início</span>
+                <input name="startDate" type="date" required />
+              </label>
+              <label>
+                <span>Data de fim</span>
+                <input name="endDate" type="date" required />
+              </label>
+              <label>
+                <span>Orçamento médio por pessoa</span>
+                <input name="budgetPerPerson" type="number" min="100" value="1800" required />
+              </label>
+            </div>
+            <button type="submit" class="button-primary button-block">Criar nova viagem</button>
+          </form>
+        `;
+      }
+
+      function renderJoinForm() {
+        return `
+          <div class="eyebrow" style="margin-top:22px;">Entrar em uma viagem</div>
+          <h2 class="section-title">Acesse o grupo pelo link compartilhado</h2>
+          <p class="section-copy">Cole o identificador da viagem ou o link recebido e entre com seu nome.</p>
+          <form id="join-trip-form" class="form-grid">
+            <label>
+              <span>Código ou link da viagem</span>
+              <input name="tripId" placeholder="trip_xxxxx ou link completo" required />
+            </label>
+            <label>
+              <span>Seu nome</span>
+              <input name="name" placeholder="Como o grupo vai te ver" required />
+            </label>
+            <label>
+              <span>E-mail</span>
+              <input name="email" type="email" placeholder="Opcional" />
+            </label>
+            <button type="submit" class="button-secondary button-block">Entrar em uma viagem</button>
+          </form>
+        `;
+      }
+
+      function renderWorkspace(activeTab = "selection") {
+        const { tripId, trip, profile, participant, ranking, timeline, notifications, activeTrips } = currentTripSnapshot();
+        const app = document.getElementById("app");
+        const nextStay = nextAccommodation(trip, participant);
+        const progress = votingProgress(trip, participant);
+
+        app.innerHTML = `
+          <section class="panel hero">
+            <div class="topbar">
+              <div>
+                <div class="eyebrow">VOYAMI · ${trip.destination}</div>
+                <div class="brand">VOYAMI</div>
+                <h1 class="workspace-title">${trip.name}</h1>
+                <p class="workspace-copy">${formatDate(trip.startDate)} até ${formatDate(trip.endDate)} · ${trip.participantsLimit} pessoas · ${formatCurrency(trip.budgetPerPerson)} por pessoa</p>
+              </div>
+              <div class="header-actions">
+                <button type="button" class="button-secondary" id="copy-link">Copiar link</button>
+                <button type="button" class="button-primary" id="share-link">Compartilhar com o grupo</button>
+                <button type="button" class="button-soft" id="go-home">Nova viagem</button>
+              </div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="mini-card stat-card">
+                <div class="eyebrow">Online</div>
+                <div class="stat-value">${trip.participants.filter((item) => item.online).length}</div>
+                <div class="stat-copy">amigos conectados agora</div>
+              </div>
+              <div class="mini-card stat-card">
+                <div class="eyebrow">Seleção</div>
+                <div class="stat-value">${trip.accommodations.length}</div>
+                <div class="stat-copy">acomodações no grupo</div>
+              </div>
+              <div class="mini-card stat-card">
+                <div class="eyebrow">Documentos</div>
+                <div class="stat-value">${trip.documents.length}</div>
+                <div class="stat-copy">arquivos centralizados</div>
+              </div>
+              <div class="mini-card stat-card">
+                <div class="eyebrow">Seu status</div>
+                <div class="stat-value" style="font-size:22px;">${participant && participant.checkedIn ? "Check-in ok" : "Pendente"}</div>
+                <div class="stat-copy">acompanhe a viagem em tempo real</div>
+              </div>
+            </div>
+          </section>
+
+          ${!participant ? `
+            <section class="panel panel-body" style="margin-top:20px;">
+              ${renderJoinForm()}
+            </section>
+          ` : ""}
+
+          <section class="panel content-tabs">
+            <div class="tab-row">
+              <button type="button" class="tab-btn ${activeTab === "selection" ? "active" : ""}" data-workspace-tab="selection">Seleção</button>
+              <button type="button" class="tab-btn ${activeTab === "voting" ? "active" : ""}" data-workspace-tab="voting">Votação</button>
+              <button type="button" class="tab-btn ${activeTab === "documents" ? "active" : ""}" data-workspace-tab="documents">Documentos</button>
+              <button type="button" class="tab-btn ${activeTab === "timeline" ? "active" : ""}" data-workspace-tab="timeline">Timeline</button>
+              ${participant ? `<button type="button" class="button-soft" style="margin-left:auto;" id="toggle-checkin">${participant.checkedIn ? "Desfazer check-in" : "Fazer check-in"}</button>` : ""}
+            </div>
+          </section>
+
+          <section class="workspace-grid">
+            <div>
+              ${renderWorkspaceTab(activeTab, trip, participant, ranking, timeline, nextStay, progress)}
+            </div>
+
+            <aside class="sidebar">
+              <section class="panel profile-card">
+                <div class="profile-head">
+                  <div class="avatar">${initials(profile ? profile.name : participant ? participant.name : "VO")}</div>
+                  <div>
+                    <div class="side-title">${profile ? profile.name : participant ? participant.name : "Visitante"}</div>
+                    <div class="side-copy">${participant ? (participant.role === "organizer" ? "Organizador" : "Participante") : "Entre para votar"} · ${trip.participants.length} pessoas no grupo</div>
+                  </div>
+                </div>
+                <div class="participants-row">
+                  ${trip.participants.map((item) => `
+                    <div class="participant">
+                      <div class="participant-avatar">${initials(item.name)}</div>
+                      <div class="participant-name">${item.name}</div>
+                      <div class="participant-status">${item.online ? "online" : "offline"}</div>
+                    </div>
+                  `).join("")}
+                </div>
+              </section>
+
+              <section class="panel profile-card">
+                <div class="eyebrow">Perfil</div>
+                <h2 class="side-title" style="margin-top:8px;">Suas viagens</h2>
+                <div class="trip-list">
+                  ${activeTrips.length ? activeTrips.map((item) => `
+                    <div class="sub-panel trip-chip">
+                      <div style="font-size:14px;font-weight:800;">${item.name}</div>
+                      <div class="side-copy">${item.destination} · ${formatDate(item.startDate)}</div>
+                    </div>
+                  `).join("") : `<div class="empty">As viagens ligadas ao seu perfil aparecem aqui.</div>`}
+                </div>
+              </section>
+
+              <section class="panel notifications-card">
+                <div class="eyebrow">Notificações</div>
+                <h2 class="side-title" style="margin-top:8px;">Alertas inteligentes</h2>
+                <div class="notifications-list">
+                  ${notifications.length ? notifications.map((item) => `<div class="sub-panel trip-chip">${item}</div>`).join("") : `<div class="empty">Os alertas aparecem à medida que a viagem ganha documentos e participantes.</div>`}
+                </div>
+                <div class="footer-note">Versão web estática. Os dados ficam salvos apenas neste navegador.</div>
+              </section>
+            </aside>
+          </section>
+        `;
+
+        attachWorkspaceHandlers(activeTab, tripId, participant, nextStay);
+      }
+
+      function renderWorkspaceTab(activeTab, trip, participant, ranking, timeline, nextStay, progress) {
+        if (activeTab === "selection") {
+          return `
+            <section class="panel panel-body">
+              <div class="eyebrow">Monte a seleção para seu grupo</div>
+              <h2 class="section-title">Cole links do Booking ou Airbnb</h2>
+              <p class="section-copy">O VOYAMI gera um preview premium automaticamente e salva a opção dentro da viagem. Mantenha entre 3 e 10 acomodações.</p>
+              <div class="selection-grid">
+                <div class="grid-2">
+                  <input id="accommodation-url" placeholder="https://booking.com/... ou https://airbnb.com/..." />
+                  <input id="accommodation-name" placeholder="Nome real da acomodação" />
+                </div>
+                <div class="grid-2">
+                  <input id="accommodation-image" placeholder="URL da foto principal real" />
+                  <input id="accommodation-location" placeholder="Localização real da acomodação" />
+                </div>
+                <div class="notice" style="margin-top:0;">
+                  Booking e Airbnb bloqueiam a leitura automática completa dentro de um HTML local. Aqui você pode colar o link e, se quiser fidelidade total, também informar nome e foto reais.
+                </div>
+                <button type="button" class="button-primary" id="add-accommodation">Adicionar acomodação</button>
+                ${trip.accommodations.length ? trip.accommodations.map((item) => `
+                  <article class="stay-card">
+                    <div class="stay-layout">
+                      <img src="${item.imageUrl}" alt="${item.name}" />
+                      <div>
+                        <div class="stay-head">
+                          <div>
+                            <div class="stay-name">${item.name}</div>
+                            <div class="muted-line">${item.location} · ${item.source} · nota ${item.rating}</div>
+                          </div>
+                          <div class="price-block">
+                            <div class="price">${formatCurrency(item.totalPrice)}</div>
+                            <div class="price-sub">${formatCurrency(item.pricePerPerson)} por pessoa</div>
+                          </div>
+                        </div>
+                        <div class="pill-row" style="margin-top:14px;">
+                          <div class="stat-pill">${item.breakfast ? "Café incluso" : "Sem café"}</div>
+                          <a class="stat-pill" href="${item.originalLink}" target="_blank" rel="noreferrer">Link original</a>
+                        </div>
+                        <div class="stay-actions">
+                          <button type="button" class="button-soft" data-edit-stay="${item.id}">Editar</button>
+                          <button type="button" class="button-soft" data-remove-stay="${item.id}">Remover</button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                `).join("") : `<div class="empty">Ainda não há acomodações. Adicione de 3 a 10 opções para liberar a votação do grupo.</div>`}
+              </div>
+            </section>
+          `;
+        }
+
+        if (activeTab === "documents") {
+          return `
+            <section class="panel panel-body">
+              <div class="eyebrow">Documentos</div>
+              <h2 class="section-title">Centralize tudo que importa na viagem</h2>
+              <p class="section-copy">Anexe comprovantes, tickets e vouchers para alimentar a linha do tempo automaticamente.</p>
+              <form id="document-form" class="form-grid">
+                <div class="grid-2">
+                  <label>
+                    <span>Tipo</span>
+                    <select name="type">
+                      ${DOCUMENT_TYPES.map((item) => `<option value="${item}">${item}</option>`).join("")}
+                    </select>
+                  </label>
+                  <label>
+                    <span>Título</span>
+                    <input name="title" placeholder="Ex.: Voo G3 1204 para Budapeste" required />
+                  </label>
+                </div>
+                <div class="grid-4">
+                  <label>
+                    <span>Cidade</span>
+                    <input name="city" required />
+                  </label>
+                  <label>
+                    <span>Data</span>
+                    <input name="date" type="date" required />
+                  </label>
+                  <label>
+                    <span>Horário</span>
+                    <input name="time" type="time" />
+                  </label>
+                  <label>
+                    <span>Arquivo</span>
+                    <input name="fileName" placeholder="Ex.: voo-budapeste.pdf" />
+                  </label>
+                </div>
+                <label>
+                  <span>Observações</span>
+                  <textarea name="notes" placeholder="Ex.: Reserva não reembolsável, plataforma 6, levar passaporte..."></textarea>
+                </label>
+                <button type="submit" class="button-primary button-block">Adicionar documento</button>
+              </form>
+              <div class="docs-list">
+                ${trip.documents.length ? trip.documents.map((doc) => `
+                  <article class="doc-card">
+                    <div class="doc-head">
+                      <div>
+                        <div style="font-size:15px;font-weight:800;">${doc.title}</div>
+                        <div class="muted-line">${doc.type} · ${doc.city} · ${formatDate(doc.date)} · ${formatTime(doc.time)}</div>
+                      </div>
+                      <div class="muted-line">${doc.fileName}</div>
+                    </div>
+                    ${doc.notes ? `<div class="section-copy" style="margin-top:12px;">${doc.notes}</div>` : ""}
+                  </article>
+                `).join("") : `<div class="empty">Ainda não há documentos anexados. Assim que você incluir hotel, voos, trem ou vouchers, a timeline começa a ser montada automaticamente.</div>`}
+              </div>
+            </section>
+          `;
+        }
+
+        if (activeTab === "timeline") {
+          return `
+            <section class="panel panel-body">
+              <div class="eyebrow">Timeline automática</div>
+              <h2 class="section-title">A linha do tempo da viagem já pronta para o grupo</h2>
+              <p class="section-copy">Os documentos anexados viram uma visão cronológica elegante com cidade, horário e tipo de deslocamento.</p>
+              <div class="timeline-list">
+                ${timeline.length ? timeline.map((item) => `
+                  <article class="timeline-card">
+                    <div class="timeline-head">
+                      <div>
+                        <div style="font-size:16px;font-weight:800;">${item.icon} ${item.title}</div>
+                        <div class="muted-line">${item.city} · ${formatDate(item.date)} · ${formatTime(item.time)} · ${item.type}</div>
+                      </div>
+                      <div class="muted-line">${item.fileName}</div>
+                    </div>
+                    ${item.notes ? `<div class="section-copy" style="margin-top:12px;">${item.notes}</div>` : ""}
+                  </article>
+                `).join("") : `<div class="empty">A timeline aparece automaticamente à medida que você adiciona comprovantes e reservas.</div>`}
+              </div>
+            </section>
+          `;
+        }
+
+        return `
+          <section class="panel panel-body">
+            <div class="eyebrow">Swipe colaborativo</div>
+            <h2 class="section-title">Decisão da hospedagem em grupo</h2>
+            <div class="progress-wrap">
+              <div class="progress-head">
+                <div class="section-copy" style="margin-top:0;">Progresso da sua avaliação</div>
+                <div class="stat-pill">${progress.current}/${progress.total}</div>
+              </div>
+              <div class="progress"><div style="width:${progress.percent}%;"></div></div>
+            </div>
+
+            ${participant ? (
+              trip.accommodations.length
+                ? nextStay
+                  ? `
+                    <article class="sub-panel swipe-card">
+                      <div class="swipe-image-wrap">
+                        <div class="source-chip">${nextStay.source}</div>
+                        <div class="rating-chip">★ ${nextStay.rating}</div>
+                        <img class="swipe-image" src="${nextStay.imageUrl}" alt="${nextStay.name}" />
+                      </div>
+                      <div class="swipe-content">
+                        <div class="swipe-head">
+                          <div>
+                            <div class="swipe-name">${nextStay.name}</div>
+                            <div class="muted-line">${nextStay.location}</div>
+                            <div class="pill-row" style="margin-top:12px;">
+                              <div class="stat-pill">${nextStay.breakfast ? "Café incluso" : "Sem café"}</div>
+                              <a class="stat-pill" href="${nextStay.originalLink}" target="_blank" rel="noreferrer">Link original</a>
+                            </div>
+                          </div>
+                          <div class="price-block">
+                            <div class="price">${formatCurrency(nextStay.totalPrice)}</div>
+                            <div class="price-sub">${formatCurrency(nextStay.pricePerPerson)} por pessoa</div>
+                          </div>
+                        </div>
+
+                        <div class="summary-grid">
+                          <div class="sub-panel summary-box">
+                            <div class="summary-label">Ideal para</div>
+                            <div class="summary-value">Grupo que quer conforto, visual bonito e boa localização.</div>
+                          </div>
+                          <div class="sub-panel summary-box">
+                            <div class="summary-label">Original</div>
+                            <div class="summary-value">${nextStay.source} · preço total em real</div>
+                          </div>
+                        </div>
+
+                        <div class="action-row">
+                          <button type="button" class="circle-action discard" data-vote="discard">✕</button>
+                          <button type="button" class="circle-action favorite" data-vote="favorite">★</button>
+                          <button type="button" class="circle-action like" data-vote="like">♥</button>
+                        </div>
+                      </div>
+                    </article>
+                  `
+                  : `<div class="empty" style="margin-top:18px;">Você concluiu suas avaliações. Acompanhe o ranking final abaixo ou reinicie a votação.</div>`
+                : `<div class="empty" style="margin-top:18px;">Adicione pelo menos 3 acomodações para começar a votação do grupo.</div>`
+            ) : `<div class="empty" style="margin-top:18px;">Entre no grupo para votar nas acomodações.</div>`}
+
+            <section class="sub-panel" style="margin-top:18px;padding:18px;">
+              <div class="ranking-head">
+                <div>
+                  <div class="eyebrow">Ranking final</div>
+                  <h3 class="section-title" style="font-size:28px;">Melhor acomodação, reserva e apoio do grupo</h3>
+                </div>
+                <button type="button" class="button-secondary" id="reset-votes">Reiniciar votação</button>
+              </div>
+              <div class="ranking-list">
+                ${ranking.length ? ranking.map((item, index) => `
+                  <article class="ranking-item">
+                    <div class="ranking-head">
+                      <div>
+                        <div class="ranking-name">${index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "•"} ${item.name}</div>
+                        <div class="muted-line">${item.location} · nota ${item.rating}</div>
+                        <div class="pill-row" style="margin-top:12px;">
+                          <a class="stat-pill" href="${item.originalLink}" target="_blank" rel="noreferrer">Reservar / abrir link</a>
+                          <div class="stat-pill">${formatCurrency(item.pricePerPerson)} por pessoa</div>
+                        </div>
+                      </div>
+                      <div class="price-block">
+                        <div class="price">${item.points} pts</div>
+                        <div class="price-sub">${item.likes} curtidas · ${item.favorites} favoritos</div>
+                      </div>
+                    </div>
+                    <div class="support-list">
+                      ${item.supporters.favorite.map((name) => `<span class="support-pill favorite">⭐ ${name}</span>`).join("")}
+                      ${item.supporters.like.map((name) => `<span class="support-pill like">♥ ${name}</span>`).join("")}
+                      ${item.supporters.discard.map((name) => `<span class="support-pill discard">✕ ${name}</span>`).join("")}
+                    </div>
+                  </article>
+                `).join("") : `<div class="empty">O ranking aparece depois que o grupo começa a votar.</div>`}
+              </div>
+            </section>
+          </section>
+        `;
+      }
+
+      function attachLandingHandlers(activeTab) {
+        document.querySelectorAll("[data-landing-tab]").forEach((button) => {
+          button.onclick = () => renderLanding(button.getAttribute("data-landing-tab"));
+        });
+
+        const createForm = document.getElementById("create-trip-form");
+        if (createForm) {
+          createForm.onsubmit = (event) => {
+            event.preventDefault();
+            const data = new FormData(createForm);
+            createTrip({
+              organizerName: data.get("organizerName").toString(),
+              organizerEmail: data.get("organizerEmail").toString(),
+              name: data.get("name").toString(),
+              destination: data.get("destination").toString(),
+              startDate: data.get("startDate").toString(),
+              endDate: data.get("endDate").toString(),
+              participantsLimit: data.get("participantsLimit").toString(),
+              budgetPerPerson: data.get("budgetPerPerson").toString(),
+            });
+            renderWorkspace("selection");
+          };
+        }
+
+        const joinForm = document.getElementById("join-trip-form");
+        if (joinForm) {
+          joinForm.onsubmit = (event) => {
+            event.preventDefault();
+            const data = new FormData(joinForm);
+            let tripId = data.get("tripId").toString().trim();
+            if (tripId.includes("#trip=")) {
+              tripId = tripId.split("#trip=")[1].split(/[&?]/)[0];
+            }
+            if (tripId.includes("/trip/")) {
+              tripId = tripId.split("/trip/")[1].split(/[?#]/)[0];
+            }
+            const ok = joinTrip(
+              tripId,
+              data.get("name").toString(),
+              data.get("email").toString(),
+            );
+            if (!ok) {
+              window.alert("Viagem não encontrada. Verifique o link compartilhado.");
+              return;
+            }
+            setTripHash(tripId);
+            renderWorkspace("selection");
+          };
+        }
+      }
+
+      function attachWorkspaceHandlers(activeTab, tripId, participant, nextStay) {
+        document.querySelectorAll("[data-workspace-tab]").forEach((button) => {
+          button.onclick = () => renderWorkspace(button.getAttribute("data-workspace-tab"));
+        });
+
+        const copyButton = document.getElementById("copy-link");
+        if (copyButton) {
+          copyButton.onclick = async () => {
+            const link = `${window.location.href.split("#")[0]}#trip=${tripId}`;
+            try {
+              await navigator.clipboard.writeText(link);
+              window.alert("Link copiado.");
+            } catch {
+              window.alert(link);
+            }
+          };
+        }
+
+        const shareButton = document.getElementById("share-link");
+        if (shareButton) {
+          shareButton.onclick = async () => {
+            const link = `${window.location.href.split("#")[0]}#trip=${tripId}`;
+            try {
+              await navigator.clipboard.writeText(link);
+              window.alert("Link da viagem pronto para compartilhar.");
+            } catch {
+              window.alert(link);
+            }
+          };
+        }
+
+        const goHomeButton = document.getElementById("go-home");
+        if (goHomeButton) {
+          goHomeButton.onclick = () => {
+            clearTripHash();
+            renderLanding("create");
+          };
+        }
+
+        const toggleCheckInButton = document.getElementById("toggle-checkin");
+        if (toggleCheckInButton) {
+          toggleCheckInButton.onclick = () => {
+            toggleCheckIn(tripId);
+            renderWorkspace(activeTab);
+          };
+        }
+
+        const addStayButton = document.getElementById("add-accommodation");
+        const stayInput = document.getElementById("accommodation-url");
+        const stayNameInput = document.getElementById("accommodation-name");
+        const stayImageInput = document.getElementById("accommodation-image");
+        const stayLocationInput = document.getElementById("accommodation-location");
+        if (stayInput) {
+          stayInput.onchange = () => {
+            const url = stayInput.value.trim();
+            if (!url) return;
+            if (stayNameInput && !stayNameInput.value.trim()) {
+              stayNameInput.value = inferStayNameFromUrl(url);
+            }
+            if (stayLocationInput && !stayLocationInput.value.trim()) {
+              stayLocationInput.value = inferLocationFromUrl(url);
+            }
+          };
+        }
+        if (addStayButton && stayInput) {
+          addStayButton.onclick = () => {
+            if (!stayInput.value.trim()) return;
+            addAccommodation(tripId, {
+              url: stayInput.value.trim(),
+              name: stayNameInput ? stayNameInput.value.trim() : "",
+              imageUrl: stayImageInput ? stayImageInput.value.trim() : "",
+              location: stayLocationInput ? stayLocationInput.value.trim() : "",
+            });
+            renderWorkspace("selection");
+          };
+        }
+
+        document.querySelectorAll("[data-remove-stay]").forEach((button) => {
+          button.onclick = () => {
+            removeAccommodation(tripId, button.getAttribute("data-remove-stay"));
+            renderWorkspace("selection");
+          };
+        });
+
+        document.querySelectorAll("[data-edit-stay]").forEach((button) => {
+          button.onclick = () => {
+            editAccommodation(tripId, button.getAttribute("data-edit-stay"));
+            renderWorkspace("selection");
+          };
+        });
+
+        const documentForm = document.getElementById("document-form");
+        if (documentForm) {
+          documentForm.onsubmit = (event) => {
+            event.preventDefault();
+            const data = new FormData(documentForm);
+            addDocument(tripId, {
+              type: data.get("type").toString(),
+              title: data.get("title").toString(),
+              city: data.get("city").toString(),
+              date: data.get("date").toString(),
+              time: data.get("time").toString(),
+              notes: data.get("notes").toString(),
+              fileName: data.get("fileName").toString(),
+            });
+            renderWorkspace("documents");
+          };
+        }
+
+        if (participant && nextStay) {
+          document.querySelectorAll("[data-vote]").forEach((button) => {
+            button.onclick = () => {
+              submitVote(tripId, nextStay.id, button.getAttribute("data-vote"));
+              renderWorkspace("voting");
+            };
+          });
+        }
+
+        const resetButton = document.getElementById("reset-votes");
+        if (resetButton) {
+          resetButton.onclick = () => {
+            resetVotes(tripId);
+            renderWorkspace("voting");
+          };
+        }
+
+        const joinForm = document.getElementById("join-trip-form");
+        if (joinForm) {
+          joinForm.onsubmit = (event) => {
+            event.preventDefault();
+            const data = new FormData(joinForm);
+            joinTrip(tripId, data.get("name").toString(), data.get("email").toString());
+            renderWorkspace(activeTab);
+          };
+        }
+      }
+
+      function renderApp() {
+        const tripId = parseTripIdFromHash();
+        if (tripId && readStore().trips[tripId]) {
+          renderWorkspace("selection");
+          return;
+        }
+        renderLanding("create");
+      }
+
+      window.addEventListener("hashchange", renderApp);
+      window.addEventListener("storage", renderApp);
+
+      renderApp();
+    </script>
+  </body>
+</html>
