@@ -982,13 +982,13 @@
       function parseTripIdFromHash() {
         const hash = window.location.hash.replace(/^#/, "");
         const params = new URLSearchParams(hash);
-        return params.get("trip") || "";
+        return params.get("t") || params.get("trip") || "";
       }
 
       function parseSharedTripDataFromHash() {
         const hash = window.location.hash.replace(/^#/, "");
         const params = new URLSearchParams(hash);
-        return params.get("invite") || params.get("data") || "";
+        return params.get("i") || params.get("invite") || params.get("data") || "";
       }
 
       function exportTripForInvite(trip) {
@@ -1000,26 +1000,14 @@
           e: trip.endDate,
           l: trip.participantsLimit,
           b: trip.budgetPerPerson,
-          o: trip.ownerProfileId,
-          c: trip.createdAt,
-          p: trip.participants.map((item) => ({
-            i: item.id,
-            r: item.profileId,
-            n: item.name,
-            t: item.role,
-          })),
           a: trip.accommodations.map((item) => ({
-            i: item.id,
-            s: item.source,
             u: item.originalLink,
             n: item.name,
             m: item.imageUrl,
             l: item.location,
             r: item.rating,
             tp: item.totalPrice,
-            pp: item.pricePerPerson,
             b: item.breakfast,
-            c: item.createdAt,
           })),
         };
       }
@@ -1045,28 +1033,21 @@
               endDate: parsed.e,
               participantsLimit: parsed.l,
               budgetPerPerson: parsed.b,
-              ownerProfileId: parsed.o,
-              createdAt: parsed.c,
-              participants: (parsed.p || []).map((item) => ({
-                id: item.i,
-                profileId: item.r,
-                name: item.n,
-                role: item.t,
-                online: false,
-                checkedIn: false,
-              })),
+              ownerProfileId: "",
+              createdAt: new Date().toISOString(),
+              participants: [],
               accommodations: (parsed.a || []).map((item) => ({
-                id: item.i,
-                source: item.s,
+                id: uid("stay"),
+                source: item.u && item.u.includes("airbnb") ? "Airbnb" : "Booking",
                 originalLink: item.u,
                 name: item.n,
                 imageUrl: item.m,
                 location: item.l,
                 rating: item.r,
                 totalPrice: item.tp,
-                pricePerPerson: item.pp,
+                pricePerPerson: Math.round((item.tp || 0) / Math.max(Number(parsed.l) || 1, 1)),
                 breakfast: item.b,
-                createdAt: item.c,
+                createdAt: new Date().toISOString(),
               })),
               votes: [],
               documents: [],
@@ -1095,10 +1076,10 @@
 
       function setTripHash(tripId, tripData = null) {
         const params = new URLSearchParams();
-        params.set("trip", tripId);
+        params.set("t", tripId);
         if (tripData) {
           const encoded = serializeTripData(tripData);
-          if (encoded) params.set("invite", encoded);
+          if (encoded) params.set("i", encoded);
         }
         history.replaceState(null, "", `${window.location.pathname}#${params.toString()}`);
       }
@@ -1107,10 +1088,10 @@
         const state = readStore();
         const trip = state.trips[tripId];
         const params = new URLSearchParams();
-        params.set("trip", tripId);
+        params.set("t", tripId);
         if (trip) {
           const encoded = serializeTripData(trip);
-          if (encoded) params.set("invite", encoded);
+          if (encoded) params.set("i", encoded);
         }
         return `${window.location.href.split("#")[0]}#${params.toString()}`;
       }
@@ -1123,8 +1104,8 @@
         if (rawValue.includes("#")) {
           const hash = rawValue.split("#")[1] || "";
           const params = new URLSearchParams(hash);
-          parsedTripId = params.get("trip") || "";
-          encoded = params.get("invite") || params.get("data") || "";
+          parsedTripId = params.get("t") || params.get("trip") || "";
+          encoded = params.get("i") || params.get("invite") || params.get("data") || "";
         } else if (rawValue.startsWith("trip_")) {
           parsedTripId = rawValue.trim();
         }
@@ -1283,7 +1264,7 @@
           documents: [],
         };
         writeStore(state);
-        setTripHash(tripId, state.trips[tripId]);
+        setTripHash(tripId);
       }
 
       function joinTrip(tripId, name, email) {
@@ -2044,8 +2025,7 @@
               window.alert("Não foi possível entrar. Verifique o link compartilhado e preencha seu e-mail de cadastro.");
               return;
             }
-            const state = readStore();
-            setTripHash(tripId, state.trips[tripId]);
+            setTripHash(tripId);
             renderWorkspace("selection");
           };
         }
@@ -2197,8 +2177,7 @@
               window.alert("Preencha nome e e-mail para criar seu cadastro e entrar no projeto.");
               return;
             }
-            const state = readStore();
-            setTripHash(tripId, state.trips[tripId]);
+            setTripHash(tripId);
             renderWorkspace(activeTab);
           };
         }
